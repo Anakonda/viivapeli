@@ -1,8 +1,5 @@
 #include "renderer.h"
 
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-
 #include <cmath>
 
 #define SCALE 25
@@ -18,6 +15,7 @@ ALLEGRO_COLOR Renderer::blue;
 
 void Renderer::init()
 {
+	al_set_new_display_flags(ALLEGRO_RESIZABLE);
 	display = al_create_display(800, 600);
 	al_init_font_addon();
 	al_init_ttf_addon();
@@ -100,11 +98,16 @@ Coordinates Renderer::TransformToGameCoordinates(const Coordinates coordinates)
 void Renderer::drawCross(const Coordinates coordinates, const ALLEGRO_COLOR* color)
 {
 	Coordinates screenCoords = TransformToScreenCoordinates(coordinates);
-	al_draw_line(screenCoords.x - 4, screenCoords.y + 4, screenCoords.x + 4, screenCoords.y - 4, *color, 2.5);
-	al_draw_line(screenCoords.x - 4, screenCoords.y - 4, screenCoords.x + 4, screenCoords.y + 4, *color, 2.5);
+	al_draw_line(screenCoords.x - 4, screenCoords.y + 4, screenCoords.x + 4, screenCoords.y - 4, *color, 2);
+	al_draw_line(screenCoords.x - 4, screenCoords.y - 4, screenCoords.x + 4, screenCoords.y + 4, *color, 2);
 }
 
 void Renderer::drawText(const Coordinates coordinates, const ALLEGRO_COLOR* color, std::string text)
 {
 	al_draw_text(font, *color, coordinates.x, coordinates.y, 0, text.c_str());
+}
+
+ALLEGRO_FONT* Renderer::getFont()
+{
+	return font;
 }

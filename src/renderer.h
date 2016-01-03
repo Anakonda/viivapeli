@@ -1,6 +1,8 @@
 #include "line.h"
 
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
 #include <string>
 
@@ -15,6 +17,8 @@ namespace Renderer
 	void deinit();
 	ALLEGRO_DISPLAY* getDisplay();
 	void drawTable();
+
+	ALLEGRO_FONT* getFont();
 
 	void drawCross(const Coordinates coordinates, const ALLEGRO_COLOR* color);
 

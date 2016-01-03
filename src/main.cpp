@@ -7,6 +7,7 @@ std::vector<Line> lines;
 
 Coordinates tempPoint;
 bool makingLine = false;
+bool placingCross = false;
 
 unsigned char extraPoints = 0;
 
@@ -79,14 +80,46 @@ int main(int argc, char **argv)
 			{
 				if(event.mouse.button == 1)
 				{
-					if(!makingLine)
+					if(placingCross)
 					{
-						makingLine = true;
-						tempPoint = Renderer::TransformToGameCoordinates(Coordinates(event.mouse.x, event.mouse.y));
+						Coordinates newCoords = Renderer::TransformToGameCoordinates(Coordinates(event.mouse.x, event.mouse.y));
+						if(validPoints.count(newCoords) == 0)
+						{
+							validPoints.insert(newCoords);
+							startPoints.insert(newCoords);
+							placingCross = false;
+							extraPoints -= 1;
+						}
+					}
+					else if(!makingLine)
+					{
+						int x = event.mouse.x;
+						int y = event.mouse.y;
+						if(extraPoints > 0 && x < al_get_text_width(Renderer::getFont(), (std::string("Place cross ") + std::to_string(extraPoints)).c_str()) && y > 25 && y < 40)
+						{
+							placingCross = true;
+						}
+						else
+						{
+							makingLine = true;
+							tempPoint = Renderer::TransformToGameCoordinates(Coordinates(event.mouse.x, event.mouse.y));
+						}
 					}
 					else
 					{
 						Line newLine(tempPoint, Renderer::TransformToGameCoordinates(Coordinates(event.mouse.x, event.mouse.y)));
+						if(lines.size() > 49)
+						{
+							newLine.color = al_map_rgba(0, 102, 0, 255);
+						}
+						if(lines.size() > 99)
+						{
+							newLine.color = Renderer::red;
+						}
+						if(lines.size() > 149)
+						{
+							newLine.color = al_map_rgba(191, 95, 0, 255);
+						}
 						char existingPoints = 0;
 						for(auto point : newLine.coordinates)
 						{
@@ -99,10 +132,6 @@ int main(int argc, char **argv)
 						{
 							makingLine = false;
 							continue;
-						}
-						else if(existingPoints == 5)
-						{
-							extraPoints += 1;
 						}
 
 						bool valid = true;
@@ -133,6 +162,10 @@ int main(int argc, char **argv)
 
 						if(newLine.valid)
 						{
+							if(existingPoints == 5)
+							{
+								extraPoints += 1;
+							}
 							lines.push_back(newLine);
 							for(auto point : newLine.coordinates)
 							{
@@ -142,9 +175,18 @@ int main(int argc, char **argv)
 						makingLine = false;
 					}
 				}
+				else
+				{
+					makingLine = false;
+					placingCross = false;
+				}
+			}
+			else if(event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+			{
+				al_acknowledge_resize(event.display.source);
 			}
 		}
-		al_clear_to_color(al_map_rgb_f(1, 1, 1));
+		al_clear_to_color(Renderer::white);
 		// Begin render
 		al_hold_bitmap_drawing(true);
 
@@ -164,6 +206,24 @@ int main(int argc, char **argv)
 		if(makingLine)
 		{
 			Renderer::drawCross(tempPoint, &Renderer::green);
+		}
+		if(extraPoints > 0)
+		{
+			if(placingCross)
+			{
+				Renderer::drawText(Coordinates(5, 25), &Renderer::red, std::string("Place cross ") + std::to_string(extraPoints));
+			}
+			else
+			{
+				Renderer::drawText(Coordinates(5, 25), &Renderer::blue, std::string("Place cross ") + std::to_string(extraPoints));
+			}
+		}
+
+		if(placingCross)
+		{
+			ALLEGRO_MOUSE_STATE mouse;
+			al_get_mouse_state(&mouse);
+			Renderer::drawCross(Renderer::TransformToGameCoordinates(Coordinates(mouse.x, mouse.y)), &Renderer::blue);
 		}
 
 		Renderer::drawText(Coordinates(5, 5), &Renderer::black, std::to_string(lines.size()));

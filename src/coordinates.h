@@ -71,7 +71,7 @@ namespace std
 	{
 		size_t operator()(const Coordinates &t) const
 		{
-			return size_t(t.x) * size_t(std::pow(2, sizeof(t.x)*8)) + size_t(t.y);
+			return size_t(t.x) * size_t(std::pow(2, sizeof(t.y)*8)) + size_t(t.y);
 		}
 	};
 }
