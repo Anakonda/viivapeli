@@ -325,14 +325,6 @@ bool game()
 
 		Renderer::drawText(Coordinates(5, 5), &Renderer::black, std::to_string(lines.size()));
 
-
-		{
-			Coordinates start = Renderer::TransformToScreenCoordinates(possibleMove.start);
-			Coordinates end = Renderer::TransformToScreenCoordinates(possibleMove.end);
-			al_draw_line(start.x, start.y, end.x, end.y, possibleMove.color, 2);
-			Renderer::drawCross(possibleMove.start, &Renderer::green);
-		}
-
 		// Finish render
 		al_hold_bitmap_drawing(false);
 
