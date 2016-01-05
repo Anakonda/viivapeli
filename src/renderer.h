@@ -13,6 +13,8 @@ namespace Renderer
 	extern ALLEGRO_COLOR white;
 	extern ALLEGRO_COLOR black;
 	extern ALLEGRO_COLOR blue;
+	extern ALLEGRO_COLOR purple;
+
 	void init();
 	void deinit();
 	ALLEGRO_DISPLAY* getDisplay();

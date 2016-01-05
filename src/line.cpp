@@ -35,3 +35,24 @@ Line::Line(Coordinates start, Coordinates end)
 		this->valid = true;
 	}
 }
+
+Line::Line()
+{
+
+}
+
+bool Line::checkOverlapping(const Line &other)
+{
+	unsigned char commonPoints = 0;
+	for(auto &myPoint : this->coordinates)
+	{
+		for(auto &otherPoint : other.coordinates)
+		{
+			if(myPoint == otherPoint)
+			{
+				commonPoints++;
+			}
+		}
+	}
+	return commonPoints > 1;
+}

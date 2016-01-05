@@ -12,6 +12,7 @@ ALLEGRO_COLOR Renderer::red;
 ALLEGRO_COLOR Renderer::white;
 ALLEGRO_COLOR Renderer::black;
 ALLEGRO_COLOR Renderer::blue;
+ALLEGRO_COLOR Renderer::purple;
 
 void Renderer::init()
 {
@@ -28,7 +29,7 @@ void Renderer::init()
 	blue = al_map_rgba(0, 0, 255, 255);
 	white = al_map_rgba(255, 255, 255, 255);
 	black = al_map_rgba(0, 0, 0, 255);
-
+	purple = al_map_rgba(128, 0, 128, 255);
 }
 void Renderer::deinit()
 {

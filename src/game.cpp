@@ -1,6 +1,8 @@
 
 #include "game.h"
 
+#include <iostream>
+
 std::vector<Widget*> widgets;
 Button* crossPlaceButton;
 
@@ -18,6 +20,10 @@ bool gameRunning;
 
 bool stayOpen = true;
 
+Line possibleMove;
+
+ALLEGRO_EVENT_QUEUE *eventQueue;
+
 void placeCross(Widget*)
 {
 	placingCross = true;
@@ -29,7 +35,76 @@ void close(Widget*)
 	gameRunning = false;
 }
 
-ALLEGRO_EVENT_QUEUE *eventQueue;
+void removeWidget(Widget* widget)
+{
+	widgets.erase(std::find(widgets.begin(), widgets.end(), widget));
+	delete widget;
+}
+
+void checkForPossibleMoves()
+{
+	bool moveFound = false;
+	for(auto &point : validPoints)
+	{
+		std::vector<Coordinates> pointsToCheck;
+		pointsToCheck.push_back(point + Coordinates( 0,  4));
+		pointsToCheck.push_back(point + Coordinates( 4,  4));
+		pointsToCheck.push_back(point + Coordinates( 4,  0));
+		pointsToCheck.push_back(point + Coordinates( 4, -4));
+		pointsToCheck.push_back(point + Coordinates( 0, -4));
+		pointsToCheck.push_back(point + Coordinates(-4, -4));
+		pointsToCheck.push_back(point + Coordinates(-4,  0));
+		pointsToCheck.push_back(point + Coordinates(-4,  4));
+
+		for(auto &pointToCheck : pointsToCheck)
+		{
+			Line tempLine = Line(point, pointToCheck);
+			bool overlapping  = false;
+			for(auto &line : lines)
+			{
+				if(tempLine.checkOverlapping(line))
+				{
+					overlapping = true;
+					break;
+				}
+			}
+			if(!overlapping)
+			{
+				unsigned char existingPoints = 0;
+				for(auto &coordinate : tempLine.coordinates)
+				{
+					if(validPoints.count(coordinate) > 0)
+					{
+						existingPoints++;
+					}
+				}
+				if(existingPoints > 3)
+				{
+					possibleMove = tempLine;
+					possibleMove.color = Renderer::purple;
+					moveFound = true;
+					break;
+				}
+
+			}
+			if(moveFound)
+			{
+				break;
+			}
+		}
+		if(moveFound)
+		{
+			break;
+		}
+	}
+	if(!moveFound)
+	{
+		const int width = al_get_display_width(Renderer::getDisplay());
+		const int height = al_get_display_height(Renderer::getDisplay());
+		widgets.push_back(new Button(Coordinates(width / 2 - 1+0, height / 2 - 10), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), close));
+	}
+}
+
 
 bool game()
 {
@@ -136,7 +211,12 @@ bool game()
 					}
 					else
 					{
+						makingLine = false;
 						Line newLine(tempPoint, Renderer::TransformToGameCoordinates(Coordinates(event.mouse.x, event.mouse.y)));
+						if(!newLine.valid)
+						{
+							continue;
+						}
 						if(lines.size() > 49)
 						{
 							newLine.color = al_map_rgba(0, 102, 0, 255);
@@ -149,6 +229,10 @@ bool game()
 						{
 							newLine.color = al_map_rgba(191, 95, 0, 255);
 						}
+						if(lines.size() > 199)
+						{
+							newLine.color = Renderer::purple;
+						}
 						char existingPoints = 0;
 						for(auto point : newLine.coordinates)
 						{
@@ -159,25 +243,13 @@ bool game()
 						}
 						if(existingPoints < 4)
 						{
-							makingLine = false;
 							continue;
 						}
 
 						bool valid = true;
 						for(auto &line : lines)
 						{
-							char samePoints = 0;
-							for(auto &point : line.coordinates)
-							{
-								for(auto &newPoint : newLine.coordinates)
-								{
-									if(point == newPoint)
-									{
-										samePoints += 1;
-									}
-								}
-							}
-							if(samePoints > 1)
+							if(line.checkOverlapping(newLine))
 							{
 								valid = false;
 								break;
@@ -185,29 +257,25 @@ bool game()
 						}
 						if(!valid)
 						{
-							makingLine = false;
 							continue;
 						}
 
-						if(newLine.valid)
+						if(existingPoints == 5)
 						{
-							if(existingPoints == 5)
+							extraPoints += 1;
+							if(extraPoints == 1)
 							{
-								extraPoints += 1;
-								if(extraPoints == 1)
-								{
-									crossPlaceButton = new Button(Coordinates(0, 25), Coordinates(100, 25), &Renderer::white, &Renderer::blue, std::string("Place cross ") + std::to_string(extraPoints), placeCross);
-									widgets.push_back(crossPlaceButton);
-								}
-								crossPlaceButton->text = std::string("Place cross ") + std::to_string(extraPoints);
+								crossPlaceButton = new Button(Coordinates(0, 25), Coordinates(100, 25), &Renderer::white, &Renderer::blue, std::string("Place cross ") + std::to_string(extraPoints), placeCross);
+								widgets.push_back(crossPlaceButton);
 							}
-							lines.push_back(newLine);
-							for(auto point : newLine.coordinates)
-							{
-								validPoints.insert(point);
-							}
+							crossPlaceButton->text = std::string("Place cross ") + std::to_string(extraPoints);
 						}
-						makingLine = false;
+						lines.push_back(newLine);
+						for(auto point : newLine.coordinates)
+						{
+							validPoints.insert(point);
+						}
+						checkForPossibleMoves();
 					}
 				}
 				else
@@ -256,6 +324,14 @@ bool game()
 		}
 
 		Renderer::drawText(Coordinates(5, 5), &Renderer::black, std::to_string(lines.size()));
+
+
+		{
+			Coordinates start = Renderer::TransformToScreenCoordinates(possibleMove.start);
+			Coordinates end = Renderer::TransformToScreenCoordinates(possibleMove.end);
+			al_draw_line(start.x, start.y, end.x, end.y, possibleMove.color, 2);
+			Renderer::drawCross(possibleMove.start, &Renderer::green);
+		}
 
 		// Finish render
 		al_hold_bitmap_drawing(false);
