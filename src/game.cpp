@@ -1,7 +1,6 @@
 
 #include "game.h"
 
-
 std::vector<Widget*> widgets;
 Button* crossPlaceButton;
 
@@ -81,7 +80,6 @@ bool game()
 		const int height = al_get_display_height(Renderer::getDisplay());
 		widgets.push_back(new Button(Coordinates(width - 100, 0), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Close"), close));
 	}
-
 
 	while (gameRunning)
 	{
