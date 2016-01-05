@@ -33,6 +33,7 @@ void Renderer::init()
 void Renderer::deinit()
 {
 	al_destroy_display(display);
+	al_destroy_font(font);
 }
 
 ALLEGRO_DISPLAY* Renderer::getDisplay()

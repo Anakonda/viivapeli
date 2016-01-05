@@ -1,3 +1,6 @@
+#ifndef LINE_H
+#define LINE_H
+
 #include "coordinates.h"
 #include <allegro5/allegro.h>
 
@@ -12,3 +15,5 @@ struct Line
 		Coordinates end;
 		bool valid = false;
 };
+
+#endif

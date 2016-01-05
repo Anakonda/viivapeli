@@ -1,3 +1,7 @@
+#ifndef COORDINATES_H
+#define COORDINATES_H
+
+
 #include <unordered_set>
 #include <cmath>
 class Coordinates
@@ -75,3 +79,5 @@ namespace std
 		}
 	};
 }
+
+#endif
