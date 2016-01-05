@@ -1,6 +1,5 @@
 
 #include "game.h"
-#include "button.h"
 
 
 std::vector<Widget*> widgets;
@@ -16,15 +15,26 @@ bool placingCross = false;
 
 unsigned char extraPoints = 0;
 
+bool gameRunning;
+
+bool stayOpen = true;
+
 void placeCross(Widget*)
 {
 	placingCross = true;
 }
 
+void close(Widget*)
+{
+	stayOpen = true;
+	gameRunning = false;
+}
+
 ALLEGRO_EVENT_QUEUE *eventQueue;
 
-void game()
+bool game()
 {
+	gameRunning = true;
 
 	{
 		validPoints.insert(Coordinates(-2,-5));
@@ -66,17 +76,22 @@ void game()
 	}
 	startPoints = validPoints;
 
+	{
+		const int width = al_get_display_width(Renderer::getDisplay());
+		const int height = al_get_display_height(Renderer::getDisplay());
+		widgets.push_back(new Button(Coordinates(width - 100, 0), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Close"), close));
+	}
 
 
-	bool running = true;
-	while (running)
+	while (gameRunning)
 	{
 		ALLEGRO_EVENT event;
 		while(al_get_next_event(eventQueue, &event))
 		{
 			if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 			{
-				running = false;
+				stayOpen = false;
+				gameRunning = false;
 				break;
 			}
 			else if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
@@ -255,4 +270,8 @@ void game()
 		delete widget;
 	}
 	widgets.clear();
+	validPoints.clear();
+	startPoints.clear();
+	lines.clear();
+	return stayOpen;
 }

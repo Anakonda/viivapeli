@@ -1,10 +1,11 @@
 #include "renderer.h"
+#include "button.h"
 
 #include <allegro5/allegro.h>
 
 #include <vector>
 #include <algorithm>
 
-void game();
+bool game();
 
 extern ALLEGRO_EVENT_QUEUE *eventQueue;
