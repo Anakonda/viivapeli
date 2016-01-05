@@ -99,9 +99,12 @@ void checkForPossibleMoves()
 	}
 	if(!moveFound)
 	{
-		const int width = al_get_display_width(Renderer::getDisplay());
-		const int height = al_get_display_height(Renderer::getDisplay());
-		widgets.push_back(new Button(Coordinates(width / 2 - 1+0, height / 2 - 10), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), close));
+		if(extraPoints == 0)
+		{
+			const int width = al_get_display_width(Renderer::getDisplay());
+			const int height = al_get_display_height(Renderer::getDisplay());
+			widgets.push_back(new Button(Coordinates(width / 2 - 1+0, height / 2 - 10), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), removeWidget));
+		}
 	}
 }
 
@@ -109,6 +112,7 @@ void checkForPossibleMoves()
 bool game()
 {
 	gameRunning = true;
+	extraPoints = 0;
 
 	{
 		validPoints.insert(Coordinates(-2,-5));
