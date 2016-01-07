@@ -41,8 +41,25 @@ void removeWidget(Widget* widget)
 	delete widget;
 }
 
+std::vector<Line> possibleMoves;
+
+bool showPossibleMoves = false;
+void ToggleClues(Widget* button)
+{
+	showPossibleMoves = !showPossibleMoves;
+	if(showPossibleMoves)
+	{
+		((Button*)button)->text = std::string("Hide possible moves.");
+	}
+	else
+	{
+		((Button*)button)->text = std::string("Show possible moves.");
+	}
+}
+
 void checkForPossibleMoves()
 {
+	possibleMoves.clear();
 	bool moveFound = false;
 	for(auto &point : validPoints)
 	{
@@ -81,20 +98,21 @@ void checkForPossibleMoves()
 				if(existingPoints > 3)
 				{
 					possibleMove = tempLine;
-					possibleMove.color = Renderer::purple;
+					possibleMove.color = Renderer::cyan;
+					possibleMoves.push_back(possibleMove);
 					moveFound = true;
-					break;
+					//break;
 				}
 
 			}
 			if(moveFound)
 			{
-				break;
+				//break;
 			}
 		}
 		if(moveFound)
 		{
-			break;
+			//break;
 		}
 	}
 	if(!moveFound)
@@ -103,11 +121,10 @@ void checkForPossibleMoves()
 		{
 			const int width = al_get_display_width(Renderer::getDisplay());
 			const int height = al_get_display_height(Renderer::getDisplay());
-			widgets.push_back(new Button(Coordinates(width / 2 - 1+0, height / 2 - 10), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), removeWidget));
+			widgets.push_back(new Button(Coordinates(width / 2 - 100, height / 2 - 10), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), removeWidget));
 		}
 	}
 }
-
 
 bool game()
 {
@@ -158,6 +175,7 @@ bool game()
 		const int width = al_get_display_width(Renderer::getDisplay());
 		const int height = al_get_display_height(Renderer::getDisplay());
 		widgets.push_back(new Button(Coordinates(width - 100, 0), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Close"), close));
+		widgets.push_back(new Button(Coordinates(0, height - 25), Coordinates(150, 25), &Renderer::white, &Renderer::blue, std::string("Show possible moves."), ToggleClues));
 	}
 
 	while (gameRunning)
@@ -231,11 +249,11 @@ bool game()
 						}
 						if(lines.size() > 149)
 						{
-							newLine.color = al_map_rgba(191, 95, 0, 255);
+							newLine.color = Renderer::purple;
 						}
 						if(lines.size() > 199)
 						{
-							newLine.color = Renderer::purple;
+							newLine.color = Renderer::black;
 						}
 						char existingPoints = 0;
 						for(auto point : newLine.coordinates)
@@ -320,6 +338,16 @@ bool game()
 			ALLEGRO_MOUSE_STATE mouse;
 			al_get_mouse_state(&mouse);
 			Renderer::drawCross(Renderer::TransformToGameCoordinates(Coordinates(mouse.x, mouse.y)), &Renderer::blue);
+		}
+
+		if(showPossibleMoves)
+		{
+			for(auto &line : possibleMoves)
+			{
+				Coordinates start = Renderer::TransformToScreenCoordinates(line.start);
+				Coordinates end = Renderer::TransformToScreenCoordinates(line.end);
+				al_draw_line(start.x, start.y, end.x, end.y, line.color, 2);
+			}
 		}
 
 		for(auto &widget : widgets)
