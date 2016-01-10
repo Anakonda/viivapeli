@@ -60,7 +60,6 @@ void ToggleClues(Widget* button)
 void checkForPossibleMoves()
 {
 	possibleMoves.clear();
-	bool moveFound = false;
 	for(auto &point : validPoints)
 	{
 		std::vector<Coordinates> pointsToCheck;
@@ -100,22 +99,11 @@ void checkForPossibleMoves()
 					possibleMove = tempLine;
 					possibleMove.color = Renderer::cyan;
 					possibleMoves.push_back(possibleMove);
-					moveFound = true;
-					//break;
 				}
-
 			}
-			if(moveFound)
-			{
-				//break;
-			}
-		}
-		if(moveFound)
-		{
-			//break;
 		}
 	}
-	if(!moveFound)
+	if(possibleMoves.empty())
 	{
 		if(extraPoints == 0)
 		{
@@ -177,6 +165,8 @@ bool game()
 		widgets.push_back(new Button(Coordinates(width - 100, 0), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Close"), close));
 		widgets.push_back(new Button(Coordinates(0, height - 25), Coordinates(150, 25), &Renderer::white, &Renderer::blue, std::string("Show possible moves."), ToggleClues));
 	}
+
+	checkForPossibleMoves();
 
 	while (gameRunning)
 	{
