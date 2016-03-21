@@ -12,7 +12,8 @@ void destroyWidget(Widget* widget)
 
 void startGame(Widget*)
 {
-	running = game();
+	Game game;
+	running = game.mainloop();
 }
 
 void quit(Widget*)

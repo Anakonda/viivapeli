@@ -14,5 +14,14 @@ Widget::~Widget()
 
 bool Widget::checkHit(Coordinates clickPos)
 {
-	return clickPos.x > this->location.x && clickPos.y > this->location.y && clickPos.x < (this->location + this->size).x && clickPos.y < (this->location + this->size).y;
+	Coordinates checkLocation = this->location;
+	if(checkLocation.x < 0)
+	{
+		checkLocation.x = al_get_display_width(Renderer::getDisplay()) + this->location.x;
+	}
+	if(checkLocation.y < 0)
+	{
+		checkLocation.y = al_get_display_height(Renderer::getDisplay()) + this->location.y;
+	}
+	return clickPos.x > checkLocation.x && clickPos.y > checkLocation.y && clickPos.x < (checkLocation + this->size).x && clickPos.y < (checkLocation + this->size).y;
 }

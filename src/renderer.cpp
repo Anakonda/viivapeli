@@ -18,6 +18,7 @@ ALLEGRO_COLOR Renderer::cyan;
 void Renderer::init()
 {
 	al_set_new_display_flags(ALLEGRO_RESIZABLE);
+	al_set_new_display_option(ALLEGRO_VSYNC, 1, ALLEGRO_SUGGEST);
 	display = al_create_display(800, 600);
 	al_init_font_addon();
 	al_init_ttf_addon();

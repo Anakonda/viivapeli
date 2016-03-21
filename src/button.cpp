@@ -18,9 +18,18 @@ Button::~Button()
 
 void Button::draw()
 {
-	al_draw_filled_rectangle(location.x, location.y, location.x + size.x, location.y + size.y, *this->backgroundColor);
-	al_draw_rectangle(location.x, location.y, location.x + size.x, location.y + size.y, Renderer::black, 1);
-	Renderer::drawText(this->location + Coordinates(2, 2), this->textColor, this->text);
+	Coordinates drawLocation = this->location;
+	if(drawLocation.x < 0)
+	{
+		drawLocation.x = al_get_display_width(Renderer::getDisplay()) + this->location.x;
+	}
+	if(drawLocation.y < 0)
+	{
+		drawLocation.y = al_get_display_height(Renderer::getDisplay()) + this->location.y;
+	}
+	al_draw_filled_rectangle(drawLocation.x, drawLocation.y, drawLocation.x + size.x, drawLocation.y + size.y, *this->backgroundColor);
+	al_draw_rectangle(drawLocation.x, drawLocation.y, drawLocation.x + size.x, drawLocation.y + size.y, Renderer::black, 1);
+	Renderer::drawText(drawLocation + Coordinates(2, 2), this->textColor, this->text);
 }
 
 bool Button::checkHit(Coordinates clickPos)
