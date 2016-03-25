@@ -35,11 +35,8 @@ int main(int argc, char **argv)
 	al_register_event_source(eventQueue, al_get_mouse_event_source());
 
 	{
-		const int width = al_get_display_width(Renderer::getDisplay());
-		const int height = al_get_display_height(Renderer::getDisplay());
-
-		menuWidgets.push_back(new Button(Coordinates(width / 2 - 50, height / 2 - 10), Coordinates(100, 20), &Renderer::white, &Renderer::black, std::string("New Game"), startGame));
-		menuWidgets.push_back(new Button(Coordinates(width - 100, 1), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Quit"), quit));
+		menuWidgets.push_back(new Button(Coordinates(-50, -10), std::pair<Alignment,Alignment>(Alignment::CENTER, Alignment::CENTER), Coordinates(100, 20), &Renderer::white, &Renderer::black, std::string("New Game"), startGame));
+		menuWidgets.push_back(new Button(Coordinates(-100, 1), std::pair<Alignment,Alignment>(Alignment::RIGHT, Alignment::TOP), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Quit"), quit));
 	}
 
 	while (running)
@@ -70,6 +67,15 @@ int main(int argc, char **argv)
 					{
 						continue;
 					}
+				}
+			}
+			else if(event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+			{
+				al_acknowledge_resize(event.display.source);
+				Coordinates newSize = Coordinates(al_get_display_width(Renderer::getDisplay()), al_get_display_height(Renderer::getDisplay()));
+				for(auto &widget : menuWidgets)
+				{
+					widget->resize(newSize);
 				}
 			}
 		}

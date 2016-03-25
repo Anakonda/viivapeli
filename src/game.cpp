@@ -99,7 +99,7 @@ void checkForPossibleMoves()
 		{
 			const int width = al_get_display_width(Renderer::getDisplay());
 			const int height = al_get_display_height(Renderer::getDisplay());
-			gamePointer->widgets.push_back(new Button(Coordinates(width / 2 - 100, height / 2 - 10), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), removeWidget));
+			gamePointer->widgets.push_back(new Button(Coordinates(width / 2 - 100, height / 2 - 10), std::pair<Alignment,Alignment>(Alignment::CENTER, Alignment::CENTER), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), removeWidget));
 		}
 	}
 }
@@ -153,8 +153,8 @@ Game::Game()
 	{
 		const int width = al_get_display_width(Renderer::getDisplay());
 		const int height = al_get_display_height(Renderer::getDisplay());
-		widgets.push_back(new Button(Coordinates(-100, 0), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Close"), close));
-		widgets.push_back(new Button(Coordinates(0, -25), Coordinates(150, 25), &Renderer::white, &Renderer::blue, std::string("Show possible moves."), ToggleClues));
+		widgets.push_back(new Button(Coordinates(-100, 0), std::pair<Alignment,Alignment>(Alignment::RIGHT, Alignment::TOP), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Close"), close));
+		widgets.push_back(new Button(Coordinates(0, -25), std::pair<Alignment,Alignment>(Alignment::LEFT, Alignment::BOTTOM), Coordinates(150, 25), &Renderer::white, &Renderer::blue, std::string("Show possible moves."), ToggleClues));
 	}
 
 	checkForPossibleMoves();
@@ -276,7 +276,7 @@ bool Game::mainloop()
 							extraPoints += 1;
 							if(extraPoints == 1)
 							{
-								crossPlaceButton = new Button(Coordinates(0, 25), Coordinates(100, 25), &Renderer::white, &Renderer::blue, std::string("Place cross ") + std::to_string(extraPoints), placeCross);
+								crossPlaceButton = new Button(Coordinates(0, 25), std::pair<Alignment,Alignment>(Alignment::LEFT,Alignment::TOP), Coordinates(100, 25), &Renderer::white, &Renderer::blue, std::string("Place cross ") + std::to_string(extraPoints), placeCross);
 								widgets.push_back(crossPlaceButton);
 							}
 							crossPlaceButton->text = std::string("Place cross ") + std::to_string(extraPoints);
@@ -298,6 +298,11 @@ bool Game::mainloop()
 			else if(event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
 			{
 				al_acknowledge_resize(event.display.source);
+				Coordinates newSize = Coordinates(al_get_display_width(Renderer::getDisplay()), al_get_display_height(Renderer::getDisplay()));
+				for(auto &widget : this->widgets)
+				{
+					widget->resize(newSize);
+				}
 			}
 		}
 		al_clear_to_color(Renderer::white);
