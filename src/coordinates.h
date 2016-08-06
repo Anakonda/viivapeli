@@ -1,11 +1,13 @@
 #ifndef COORDINATES_H
 #define COORDINATES_H
 
+#include <iostream>
 
 #include <unordered_set>
 #include <cmath>
 class Coordinates
 {
+	friend std::ostream& operator<<(std::ostream &output, const Coordinates &vector);
 	public:
 		short x;
 		short y;

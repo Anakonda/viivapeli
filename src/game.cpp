@@ -1,16 +1,9 @@
 
 #include "game.h"
 
-
-
-
-
-
 bool gameRunning;
 
 bool stayOpen = true;
-
-Line possibleMove;
 
 ALLEGRO_EVENT_QUEUE *eventQueue;
 
@@ -33,6 +26,69 @@ void removeWidget(Widget* widget)
 	delete widget;
 }
 
+void undo(Widget*)
+{
+	if(gamePointer->moveHistory.size() == 0)
+	{
+		return;
+	}
+	Game::Move *moveToUndo = &gamePointer->moveHistory.at(gamePointer->moveHistory.size() - 1);
+	if(moveToUndo->type == 1)
+	{
+		if(moveToUndo->line != gamePointer->lines.at(gamePointer->lines.size() - 1))
+		{
+			//return;
+		}
+		Line lineToUndo = moveToUndo->line;
+		gamePointer->lines.pop_back();
+
+		gamePointer->validPoints = gamePointer->startPoints;
+		for(auto &line : gamePointer->lines)
+		{
+			for(auto point : line.coordinates)
+			{
+				gamePointer->validPoints.insert(point);
+			}
+		}
+
+		bool allPoints = true;
+		for(auto &point : lineToUndo.coordinates)
+		{
+			if(gamePointer->validPoints.find(point) == gamePointer->validPoints.end())
+			{
+				allPoints = false;
+				break;
+			}
+		}
+		if(allPoints)
+		{
+			gamePointer->extraPoints -= 1;
+			if(gamePointer->extraPoints == 0)
+			{
+				gamePointer->widgets.erase(std::find(gamePointer->widgets.begin(), gamePointer->widgets.end(), gamePointer->crossPlaceButton));
+				delete gamePointer->crossPlaceButton;
+				gamePointer->crossPlaceButton = nullptr;
+			}
+		}
+	}
+	else
+	{
+		gamePointer->validPoints.erase(moveToUndo->point);
+		if(gamePointer->startPoints.find(moveToUndo->point) == gamePointer->startPoints.end())
+		{
+			std::cout<<moveToUndo->point<<std::endl;
+		}
+		gamePointer->startPoints.erase(moveToUndo->point);
+		gamePointer->extraPoints += 1;
+		if(gamePointer->extraPoints == 1)
+		{
+			gamePointer->crossPlaceButton = new Button(Coordinates(0, 25), std::pair<Alignment,Alignment>(Alignment::LEFT,Alignment::TOP), Coordinates(100, 25), &Renderer::white, &Renderer::blue, std::string("Place cross ") + std::to_string(gamePointer->extraPoints), placeCross);
+			gamePointer->widgets.push_back(gamePointer->crossPlaceButton);
+		}
+		gamePointer->crossPlaceButton->text = std::string("Place cross ") + std::to_string(gamePointer->extraPoints);
+	}
+	gamePointer->moveHistory.pop_back();
+}
 
 void ToggleClues(Widget* button)
 {
@@ -86,6 +142,7 @@ void checkForPossibleMoves()
 				}
 				if(existingPoints > 3)
 				{
+					Line possibleMove;
 					possibleMove = tempLine;
 					possibleMove.color = Renderer::cyan;
 					gamePointer->possibleMoves.push_back(possibleMove);
@@ -97,9 +154,7 @@ void checkForPossibleMoves()
 	{
 		if(gamePointer->extraPoints == 0)
 		{
-			const int width = al_get_display_width(Renderer::getDisplay());
-			const int height = al_get_display_height(Renderer::getDisplay());
-			gamePointer->widgets.push_back(new Button(Coordinates(width / 2 - 100, height / 2 - 10), std::pair<Alignment,Alignment>(Alignment::CENTER, Alignment::CENTER), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), removeWidget));
+			gamePointer->widgets.push_back(new Button(Coordinates(-100, -10), std::pair<Alignment,Alignment>(Alignment::CENTER, Alignment::CENTER), Coordinates(200, 20), &Renderer::white, &Renderer::red, std::string("No more valid moves."), removeWidget));
 		}
 	}
 }
@@ -155,6 +210,7 @@ Game::Game()
 		const int height = al_get_display_height(Renderer::getDisplay());
 		widgets.push_back(new Button(Coordinates(-100, 0), std::pair<Alignment,Alignment>(Alignment::RIGHT, Alignment::TOP), Coordinates(100, 25), &Renderer::white, &Renderer::red, std::string("Close"), close));
 		widgets.push_back(new Button(Coordinates(0, -25), std::pair<Alignment,Alignment>(Alignment::LEFT, Alignment::BOTTOM), Coordinates(150, 25), &Renderer::white, &Renderer::blue, std::string("Show possible moves."), ToggleClues));
+		widgets.push_back(new Button(Coordinates(-50, -25), std::pair<Alignment,Alignment>(Alignment::RIGHT, Alignment::BOTTOM), Coordinates(50, 25), &Renderer::white, &Renderer::blue, std::string("Undo"), undo));
 	}
 
 	checkForPossibleMoves();
@@ -213,6 +269,11 @@ bool Game::mainloop()
 								crossPlaceButton = nullptr;
 							}
 							checkForPossibleMoves();
+
+							Move newMove;
+							newMove.point = newCoords;
+							newMove.type = 2;
+							moveHistory.push_back(newMove);
 						}
 					}
 					else if(!makingLine)
@@ -287,6 +348,11 @@ bool Game::mainloop()
 							validPoints.insert(point);
 						}
 						checkForPossibleMoves();
+
+						Move newMove;
+						newMove.line = lines.at(lines.size() - 1);
+						newMove.type = 1;
+						moveHistory.push_back(newMove);
 					}
 				}
 				else

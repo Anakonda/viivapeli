@@ -16,6 +16,18 @@ struct Line
 		Coordinates start;
 		Coordinates end;
 		bool valid = false;
+		bool operator==(const Line &line) const;
+		bool operator!=(const Line &line) const;
 };
+
+inline bool Line::operator==(const Line &other) const
+{
+	return (this->start == other.start && this->end == other.end) || (this->end == other.start && this->start == other.end);
+}
+
+inline bool Line::operator!=(const Line &other) const
+{
+	return !(*this == other);
+}
 
 #endif

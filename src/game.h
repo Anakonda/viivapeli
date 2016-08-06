@@ -29,4 +29,17 @@ class Game
 
 		std::vector<Line> possibleMoves;
 		bool showPossibleMoves;
+
+		struct Move
+		{
+			int type;
+			union
+			{
+				Line line;
+				Coordinates point;
+			};
+			Move() { memset( this, 0, sizeof( Move ) ); }
+		};
+
+		std::vector<Move> moveHistory;
 };
